@@ -1,4 +1,4 @@
-Generate SSH Key (CentOS)
+Generate SSH Key (local machine)
 
 `ssh-keygen -t rsa -b 4096`
 
