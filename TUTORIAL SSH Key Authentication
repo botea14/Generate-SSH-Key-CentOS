@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial: Set Up SSH Key Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .step-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #4A5568;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+        }
+        .copy-btn.copied {
+            background-color: #48BB78;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">SSH Key Authentication Setup</h1>
+            <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">A guide to passwordless login from Windows to Linux.</p>
+        </header>
+
+        <main class="space-y-12">
+
+            <!-- Step 1: Generate Keys -->
+            <section id="generate-keys">
+                <h2 class="text-3xl font-bold mb-6 border-b-2 border-indigo-500 pb-3 text-gray-900 dark:text-white">
+                    <span class="text-indigo-500 mr-2">1.</span> Generate SSH Key Pair on Windows
+                </h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg step-card">
+                    <p class="mb-4 text-gray-600 dark:text-gray-300">First, create a key pair on your local machine. Open PowerShell or Command Prompt and run:</p>
+                    <div class="bg-gray-900 rounded-lg p-4 text-white relative">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">ssh-keygen -t rsa -b 4096</code></pre>
+                    </div>
+                    <div class="mt-6 p-4 border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 rounded-r-lg">
+                        <h4 class="font-bold text-yellow-800 dark:text-yellow-200">Important Prompts:</h4>
+                        <ul class="list-disc list-inside mt-2 space-y-2 text-gray-700 dark:text-gray-300">
+                            <li>When asked for a file location, press <span class="font-semibold">Enter</span> to accept the default.</li>
+                            <li>When asked for a passphrase, press <span class="font-semibold">Enter twice</span> to leave it empty (required for SSHFS-Win).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 2: Prepare Server -->
+            <section id="prepare-server">
+                <h2 class="text-3xl font-bold mb-6 border-b-2 border-teal-500 pb-3 text-gray-900 dark:text-white">
+                    <span class="text-teal-500 mr-2">2.</span> Prepare the Linux Server
+                </h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg step-card">
+                    <p class="mb-4 text-gray-600 dark:text-gray-300">Log into your Linux server with a password to create the necessary files and set permissions.</p>
+                    <div class="bg-gray-900 rounded-lg p-4 text-white relative mb-4">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash"># Create directory and authorized_keys file
+mkdir -p ~/.ssh && touch ~/.ssh/authorized_keys</code></pre>
+                    </div>
+                    <div class="bg-gray-900 rounded-lg p-4 text-white relative">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash"># Set strict permissions
+chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys</code></pre>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Step 3: Add Public Key -->
+            <section id="add-key">
+                 <h2 class="text-3xl font-bold mb-6 border-b-2 border-cyan-500 pb-3 text-gray-900 dark:text-white">
+                    <span class="text-cyan-500 mr-2">3.</span> Add Your Public Key to the Server
+                </h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg step-card">
+                    <p class="mb-4 text-gray-600 dark:text-gray-300">On your **Windows machine**, display your public key and copy the entire output.</p>
+                    <div class="bg-gray-900 rounded-lg p-4 text-white relative mb-6">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">type %USERPROFILE%\.ssh\id_rsa.pub</code></pre>
+                    </div>
+                     <p class="mb-4 text-gray-600 dark:text-gray-300">On your **Linux server**, open `authorized_keys` with an editor and paste the key.</p>
+                    <div class="bg-gray-900 rounded-lg p-4 text-white relative">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">nano ~/.ssh/authorized_keys</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 4: Test -->
+            <section id="test-connection">
+                 <h2 class="text-3xl font-bold mb-6 border-b-2 border-green-500 pb-3 text-gray-900 dark:text-white">
+                    <span class="text-green-500 mr-2">4.</span> Test the Connection
+                </h2>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg step-card">
+                    <p class="mb-4 text-gray-600 dark:text-gray-300">From a new terminal on Windows, try connecting. You should log in without a password prompt.</p>
+                    <div class="bg-gray-900 rounded-lg p-4 text-white relative">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">ssh root@linux.intra</code></pre>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-12">
+            <!-- <button id="downloadBtn" class="bg-gray-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-800 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-white transition-all">
+                Download This Tutorial
+            </button> -->
+        </footer>
+
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const pre = button.parentElement;
+            const code = pre.querySelector('code');
+            const text = code.innerText;
+
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                button.textContent = 'Error';
+            }
+            document.body.removeChild(textArea);
+            
+            setTimeout(() => {
+                button.textContent = 'Copy';
+                button.classList.remove('copied');
+            }, 2000);
+        }
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tutorial-ssh-key-auth.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+
+</body>
+</html>
